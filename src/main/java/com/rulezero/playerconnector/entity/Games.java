@@ -2,6 +2,8 @@ package com.rulezero.playerconnector.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,42 +16,33 @@ public class Games {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gameId;
 
+    @Column
     private String name;
 
+    @Column
     private Integer minPlayers;
 
+    @Column
     private Integer maxPlayers;
 
+    @Column
     private String description;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_games",
-            joinColumns = @JoinColumn(name = "game_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<Users> players = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "store_games",
-            joinColumns = @JoinColumn(name = "game_id"),
-            inverseJoinColumns = @JoinColumn(name = "store_id")
-    )
-    private Set<Stores> stores = new HashSet<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "gameUsers", fetch = FetchType.EAGER)
+    private Set<Users> gameUsers = new HashSet<>();
 
     // Helper methods for managing players
-    public void addPlayer(Users user) {
-        this.players.add(user);
-        user.getUserGames().add(this);
+    public void addGameUser(Users user) {
+        this.gameUsers.add(user);
+        user.getGameUsers().add(this);
     }
 
-    public void removePlayer(Users user) {
-        this.players.remove(user);
-        user.getUserGames().remove(this);
+    public void removeGameUser(Users user) {
+        this.gameUsers.remove(user);
+        user.getGameUsers().remove(this);
     }
 
-    public void addStore(Stores stores) {
-    }
 }
 

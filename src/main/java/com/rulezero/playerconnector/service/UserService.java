@@ -2,11 +2,9 @@ package com.rulezero.playerconnector.service;
 
 import com.rulezero.playerconnector.controller.model.UsersData;
 import com.rulezero.playerconnector.dao.GamesDao;
-import com.rulezero.playerconnector.dao.StoresDao;
 import com.rulezero.playerconnector.dao.UsersDao;
 import com.rulezero.playerconnector.entity.Availability;
 import com.rulezero.playerconnector.entity.Games;
-import com.rulezero.playerconnector.entity.Stores;
 import com.rulezero.playerconnector.entity.Users;
 import com.rulezero.playerconnector.dao.AvailabilityDao;
 import com.rulezero.playerconnector.exception.ResourceNotFoundException;
@@ -29,9 +27,6 @@ public class UserService {
 
     @Autowired
     private GamesDao gamesDao;
-
-    @Autowired
-    private StoresDao storesDao;
 
     @Transactional
     public UsersData saveUser(UsersData usersData) {
@@ -63,7 +58,7 @@ public class UserService {
                     .map(gameId -> gamesDao.findById(gameId)
                             .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId)))
                     .collect(Collectors.toSet());
-            user.setUserGames(games);
+            user.setGameUsers(games);
         }
 
         return user;
@@ -115,34 +110,29 @@ public class UserService {
         }
     }
 
-    @Transactional
-    public void updateUserStores(Long userId, Set<Long> storeIds) throws ResourceNotFoundException {
-        Users user = usersDao.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-
-        Set<Stores> newStores = storeIds.stream()
-                .map(storeId -> storesDao.findById(storeId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Store not found with id: " + storeId)))
-                .collect(Collectors.toSet());
-
-        // Remove stores not in the new set
-        user.getUserStores().removeIf(store -> !newStores.contains(store));
-
-        // Add new stores
-        newStores.forEach(store -> {
-            if (!user.getUserStores().contains(store)) {
-                user.getUserStores().add(store);
-                store.getStoreUsers().add(user);
-            }
-        });
-
-        usersDao.save(user);
-    }
-
     public Users getUserEntityById(Long userId) {
         return usersDao.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
+
+//    @Transactional
+//    public void updateUserGames(Users user, Set<Long> gameIds) {
+//        Set<Games> newGames = gameIds.stream()
+//                .map(gameId -> gamesDao.findById(gameId)
+//                        .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId)))
+//                .collect(Collectors.toSet());
+//
+//        // Remove games not in the new set
+//        user.getGameUsers().removeIf(game -> !newGames.contains(game));
+//
+//        // Add new games
+//        newGames.forEach(game -> {
+//            if (!user.getGameUsers().contains(game)) {
+//                user.getGameUsers().add(game);
+//                game.getGameUsers().add(user);
+//            }
+//        });
+//    }
 
     @Transactional
     public void updateUserGames(Users user, Set<Long> gameIds) {
@@ -152,13 +142,13 @@ public class UserService {
                 .collect(Collectors.toSet());
 
         // Remove games not in the new set
-        user.getUserGames().removeIf(game -> !newGames.contains(game));
+        user.getGameUsers().removeIf(game -> !newGames.contains(game));
 
         // Add new games
         newGames.forEach(game -> {
-            if (!user.getUserGames().contains(game)) {
-                user.getUserGames().add(game);
-                game.getPlayers().add(user);
+            if (!user.getGameUsers().contains(game)) {
+                user.getGameUsers().add(game);
+                game.getGameUsers().add(user);
             }
         });
     }
@@ -169,8 +159,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         // Remove the user from all games and stores
-        user.getUserGames().forEach(game -> game.getPlayers().remove(user));
-        user.getUserStores().forEach(store -> store.getStoreUsers().remove(user));
+        user.getGameUsers().forEach(game -> game.getGameUsers().remove(user));
 
         usersDao.delete(user);
     }
@@ -208,7 +197,7 @@ public class UserService {
         usersData.setUserLoginName(user.getUserLoginName());
         usersData.setUserEmail(user.getUserEmail());
         usersData.setAvailabilityId(user.getUserAvailability() != null ? user.getUserAvailability().getAvailabilityId() : null);
-        usersData.setGameIds(user.getUserGames().stream().map(Games::getGameId).collect(Collectors.toSet()));
+        usersData.setGameIds(user.getGameUsers().stream().map(Games::getGameId).collect(Collectors.toSet()));
         return usersData;
     }
 
@@ -216,8 +205,7 @@ public class UserService {
     public void deleteUsers(List<Long> userIds) {
         List<Users> users = usersDao.findAllById(userIds);
         users.forEach(user -> {
-            user.getUserGames().forEach(game -> game.getPlayers().remove(user));
-            user.getUserStores().forEach(store -> store.getStoreUsers().remove(user));
+            user.getGameUsers().forEach(game -> game.getGameUsers().remove(user));
             usersDao.delete(user);
         });
     }

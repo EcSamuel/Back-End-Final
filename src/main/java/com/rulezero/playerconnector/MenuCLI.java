@@ -2,7 +2,6 @@ package com.rulezero.playerconnector;
 
 import com.rulezero.playerconnector.handler.AvailabilityMenuHandler;
 import com.rulezero.playerconnector.handler.GameMenuHandler;
-import com.rulezero.playerconnector.handler.StoreMenuHandler;
 import com.rulezero.playerconnector.handler.UserMenuHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,16 +19,12 @@ public class MenuCLI {
     private UserMenuHandler userMenuHandler;
 
     @Autowired
-    private StoreMenuHandler storeMenuHandler;
-
-    @Autowired
     private GameMenuHandler gameMenuHandler;
 
     private List<String> mainMenu = List.of(
             "1) Users",
             "2) Games",
             "3) Availability",
-            "4) Stores",
             "0) Quit"
     );
 
@@ -44,7 +39,6 @@ public class MenuCLI {
                 case 1 -> userMenuHandler.process();
                 case 2 -> gameMenuHandler.process();
                 case 3 -> availabilityMenuHandler.process();
-                case 4 -> storeMenuHandler.process();
                 case 0 -> done = true;
                 default -> System.out.println("Invalid selection");
             }

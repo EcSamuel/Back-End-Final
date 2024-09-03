@@ -80,19 +80,6 @@ public class UsersController {
         return userService.getAllUsers();
     }
 
-    @PatchMapping("/{userId}/stores")
-    public ResponseEntity<Void> updateUserStores(@PathVariable Long userId, @RequestBody Set<Long> storeIds) {
-        log.info("Updating stores for User {}: {}", userId, storeIds);
-        try {
-            userService.updateUserStores(userId, storeIds);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @PatchMapping("/{userId}/availability")
     public ResponseEntity<UsersData> updateUserAvailability(@PathVariable Long userId, @RequestParam Long availabilityId) {
         log.info("Updating availability for User {}: {}", userId, availabilityId);

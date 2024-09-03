@@ -65,15 +65,11 @@ public class Users {
     }
 
     // TODO: These relationships need verification so that their relationships work
-    @ManyToMany(mappedBy = "players", fetch = FetchType.LAZY)
-    private Set<Games> userGames = new HashSet<>();
-
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
-            name = "store_users",
+            name = "game_users",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "store_id")
+            inverseJoinColumns = @JoinColumn(name = "game_id")
     )
-    private Set<Stores> userStores = new HashSet<>();
-
+    private Set<Games> gameUsers = new HashSet<>();
 }

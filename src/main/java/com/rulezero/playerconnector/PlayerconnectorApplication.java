@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.List;
 import java.util.Scanner;
-
+// TODO: Remove all Store-Level and Store-Facing Files on an attempt to Scale down and resolve circular dependencies
 @SpringBootApplication
 public class PlayerconnectorApplication {
 

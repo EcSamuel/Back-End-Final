@@ -77,7 +77,6 @@ public class GameMenuHandler {
         newGame.setMinPlayers(minPlayers);
         newGame.setMaxPlayers(maxPlayers);
         newGame.setGameUsers(null);
-        newGame.setStores(null);
 
         GamesData savedGame =gamesService.saveGame(newGame);
         System.out.println("Game attempting add" +savedGame);

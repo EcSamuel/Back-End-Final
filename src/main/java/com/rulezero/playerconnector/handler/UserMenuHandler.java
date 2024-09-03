@@ -97,7 +97,6 @@ public class UserMenuHandler {
         // TODO: Find out if this HooDoo Works
         newUser.setAvailabilityId(null);
         newUser.setGameIds(null);
-        newUser.setStoreIds(null);
 
         UsersData savedUser = usersService.saveUser(newUser);
         System.out.println("User added: " + savedUser);
@@ -185,19 +184,6 @@ public class UserMenuHandler {
             existingUser.setUserEmail(userEmail);
         }
 
-        System.out.println("Update the user's stores? (leave blank to keep current):");
-        String storeIdsInput = scanner.nextLine();
-        if (!storeIdsInput.isEmpty()) {
-            Set<Long> currentStoreIds = existingUser.getStoreIds();
-            if (currentStoreIds == null) {
-                currentStoreIds = new HashSet<>();
-            }
-            String[] newStoreIds = storeIdsInput.trim().split(",");
-            for (String storeId : newStoreIds) {
-                currentStoreIds.add(Long.parseLong(storeId));
-            }
-            existingUser.setStoreIds(currentStoreIds);
-        }
         // This is where it starts to go wrong
         System.out.println("Update the user's games? (leave blank to keep current):");
         String gameIdsInput = scanner.nextLine();

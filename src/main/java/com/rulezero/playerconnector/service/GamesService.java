@@ -4,7 +4,6 @@ import com.rulezero.playerconnector.controller.model.GamesData;
 import com.rulezero.playerconnector.dao.GamesDao;
 import com.rulezero.playerconnector.entity.Games;
 import com.rulezero.playerconnector.entity.Users;
-import com.rulezero.playerconnector.entity.Stores;
 import com.rulezero.playerconnector.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,27 +51,33 @@ public class GamesService {
             game.setDescription(gamesData.getGameDescription());
         }
         if (gamesData.getGameUsers() != null) {
-            updatePlayers(game, gamesData.getGameUsers());
+            updateGameUsers(game, gamesData.getGameUsers());
         }
-        if (gamesData.getStores() != null) {
-            updateStores(game, gamesData.getStores());
-        }
+    }
+
+    private void updateGameUsers(Games game, Set<Users> newGameUsers) {
+        Set<Users> existingGameUsers = game.getGameUsers();
+        existingGameUsers.forEach(user -> {
+            if (!newGameUsers.contains(user)) {
+                user.getGameUsers().remove(game);
+                existingGameUsers.remove(user);
+            }
+        });
+
+        newGameUsers.forEach(user -> {
+            if (!existingGameUsers.contains(user)) {
+                game.addGameUser(user);
+                user.getGameUsers().add(game);
+            }
+        });
     }
 
     private void updatePlayers(Games game, Set<Users> newPlayers) {
         // Remove players not in the new set
-        game.getPlayers().removeIf(player -> !newPlayers.contains(player));
+        game.getGameUsers().removeIf(player -> !newPlayers.contains(player));
 
         // Add new players
-        newPlayers.forEach(game::addPlayer);
-    }
-
-    private void updateStores(Games game, Set<Stores> newStores) {
-        // Remove stores not in the new set
-        game.getStores().removeIf(store -> !newStores.contains(store));
-
-        // Add new stores
-        newStores.forEach(game::addStore);
+        newPlayers.forEach(game::addGameUser);
     }
 
     public List<GamesData> searchGamesByName(String query) {
@@ -88,8 +93,7 @@ public class GamesService {
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
 
         // Remove the game from all players and stores
-        game.getPlayers().forEach(player -> player.getUserGames().remove(game));
-        game.getStores().forEach(store -> store.getStoreGames().remove(game));
+        game.getGameUsers().forEach(player -> player.getGameUsers().remove(game));
 
         gamesDao.delete(game);
     }
@@ -102,11 +106,7 @@ public class GamesService {
         game.setDescription(gamesData.getGameDescription());
 
         if (gamesData.getGameUsers() != null) {
-            gamesData.getGameUsers().forEach(game::addPlayer);
-        }
-
-        if (gamesData.getStores() != null) {
-            gamesData.getStores().forEach(game::addStore);
+            gamesData.getGameUsers().forEach(game::addGameUser);
         }
 
         return game;
@@ -119,8 +119,7 @@ public class GamesService {
         gamesData.setMinPlayers(game.getMinPlayers());
         gamesData.setMaxPlayers(game.getMaxPlayers());
         gamesData.setGameDescription(game.getDescription());
-        gamesData.setGameUsers(game.getPlayers());
-        gamesData.setStores(game.getStores());
+        gamesData.setGameUsers(game.getGameUsers());
         return gamesData;
     }
 
@@ -135,16 +134,7 @@ public class GamesService {
     public GamesData updateGamePlayers(Long gameId, Set<Users> newPlayers) throws ResourceNotFoundException {
         Games game = gamesDao.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-        updatePlayers(game, newPlayers);
-        Games updatedGame = gamesDao.save(game);
-        return convertToGamesData(updatedGame);
-    }
-
-    @Transactional
-    public GamesData updateGameStores(Long gameId, Set<Stores> newStores) throws ResourceNotFoundException {
-        Games game = gamesDao.findById(gameId)
-                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-        updateStores(game, newStores);
+        updateGameUsers(game, newPlayers);
         Games updatedGame = gamesDao.save(game);
         return convertToGamesData(updatedGame);
     }
@@ -153,8 +143,7 @@ public class GamesService {
     public void deleteGames(List<Long> gameIds) {
         List<Games> games = gamesDao.findAllById(gameIds);
         games.forEach(game -> {
-            game.getPlayers().forEach(player -> player.getUserGames().remove(game));
-            game.getStores().forEach(store -> store.getStoreGames().remove(game));
+            game.getGameUsers().forEach(player -> player.getGameUsers().remove(game));
             gamesDao.delete(game);
         });
     }
