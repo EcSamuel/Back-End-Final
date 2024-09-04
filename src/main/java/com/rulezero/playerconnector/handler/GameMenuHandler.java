@@ -135,18 +135,17 @@ public class GameMenuHandler {
         }
         // TODO: This is new and needs to be verified both structure and logic-wise. If it works, apply similar methods to other handler calls.
         System.out.println("Update players for the game? (enter player IDs separated by commas, leave blank to keep current):");
-        String playerIdsInput = scanner.nextLine();
-        if (!playerIdsInput.isEmpty()) {
-            Set<Users> currentPlayers = existingGame.getGameUsers();
+        String gameUserIdsInput = scanner.nextLine();
+        if (!gameUserIdsInput.isEmpty()) {
+            Set<Long> currentPlayers = existingGame.getUserIds();
             if (currentPlayers == null) {
                 currentPlayers = new HashSet<>();
             }
-            String[] newPlayerIds = playerIdsInput.split(",");
-            for (String playerId : newPlayerIds) {
-                Users player = userService.getUserEntityById(Long.parseLong(playerId.trim()));
-                currentPlayers.add(player);
+            String[] newGameUserIds = gameUserIdsInput.split(",");
+            for (String userId : newGameUserIds) {
+                currentPlayers.add(Long.parseLong(userId));
             }
-            existingGame.setGameUsers(currentPlayers);
+            existingGame.setUserIds(currentPlayers);
         }
 
         GamesData updatedGame = gamesService.patchGame(existingGame.getGameId(), existingGame);

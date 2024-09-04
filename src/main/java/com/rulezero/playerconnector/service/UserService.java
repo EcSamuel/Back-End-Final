@@ -114,26 +114,6 @@ public class UserService {
         return usersDao.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
-
-//    @Transactional
-//    public void updateUserGames(Users user, Set<Long> gameIds) {
-//        Set<Games> newGames = gameIds.stream()
-//                .map(gameId -> gamesDao.findById(gameId)
-//                        .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId)))
-//                .collect(Collectors.toSet());
-//
-//        // Remove games not in the new set
-//        user.getGameUsers().removeIf(game -> !newGames.contains(game));
-//
-//        // Add new games
-//        newGames.forEach(game -> {
-//            if (!user.getGameUsers().contains(game)) {
-//                user.getGameUsers().add(game);
-//                game.getGameUsers().add(user);
-//            }
-//        });
-//    }
-
     @Transactional
     public void updateUserGames(Users user, Set<Long> gameIds) {
         Set<Games> newGames = gameIds.stream()
@@ -152,7 +132,6 @@ public class UserService {
             }
         });
     }
-
     @Transactional
     public void deleteUser(Long userId) throws ResourceNotFoundException {
         Users user = usersDao.findById(userId)

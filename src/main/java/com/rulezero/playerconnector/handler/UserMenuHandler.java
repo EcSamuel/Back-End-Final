@@ -184,7 +184,6 @@ public class UserMenuHandler {
             existingUser.setUserEmail(userEmail);
         }
 
-        // This is where it starts to go wrong
         System.out.println("Update the user's games? (leave blank to keep current):");
         String gameIdsInput = scanner.nextLine();
         if (!gameIdsInput.isEmpty()) {

@@ -13,4 +13,5 @@ public class GamesData {
     private Set<Users> gameUsers;
     private Integer minPlayers;
     private Integer maxPlayers;
+    private Set<Long> userIds;
 }

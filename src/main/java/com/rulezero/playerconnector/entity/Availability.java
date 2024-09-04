@@ -21,8 +21,8 @@ public class Availability {
 
     @Column(nullable = false, length = 64)
     private String endTime;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    //TODO: Repair the relationship making note of both ownership and directionality
+    @ManyToOne()
     @JoinColumn(name = "user_id")
     private Users user;
 
