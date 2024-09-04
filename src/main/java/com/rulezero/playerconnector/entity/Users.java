@@ -6,7 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -46,23 +48,35 @@ public class Users {
     @Column(nullable = false, unique = true)
     private String userEmail;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Availability> availabilities = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<Availability> availabilities = new ArrayList<>();
 
-    public Availability getUserAvailability() {
-        return availabilities.stream()
-                .findFirst()
-                .orElse(null);
+    public void addAvailability(Availability availability) {
+        availabilities.add(availability);
     }
 
-    public void setUserAvailability(Availability availability) {
-        if (availability != null) {
-            availability.setUser(this);
-            this.availabilities.add(availability);
-        } else {
-            this.availabilities.removeIf(a -> a.getUser().equals(this));
-        }
+    public void removeAvailability(Availability availability) {
+        availabilities.remove(availability);
     }
+
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Availability> availabilities = new HashSet<>();
+//
+//    public Availability getUserAvailability() {
+//        return availabilities.stream()
+//                .findFirst()
+//                .orElse(null);
+//    }
+//
+//    public void setUserAvailability(Availability availability) {
+//        if (availability != null) {
+//            availability.setUser(this);
+//            this.availabilities.add(availability);
+//        } else {
+//            this.availabilities.removeIf(a -> a.getUser().equals(this));
+//        }
+//    }
 
     // TODO: These relationships need verification so that their relationships work
     @ManyToMany(cascade = CascadeType.PERSIST)

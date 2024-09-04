@@ -73,6 +73,8 @@ public class AvailabilityMenuHandler {
         newAvailability.setDayOfWeek(dayOfWeek);
         newAvailability.setStartTime(startTime);
         newAvailability.setEndTime(endTime);
+        newAvailability.setUserId(userId);
+        // ^this might be a problem for a unidirectional^
 
         try {
             // Convert AvailabilityData to Availability entity
@@ -81,8 +83,14 @@ public class AvailabilityMenuHandler {
             // Fetch the User entity
             Users user = userService.getUserEntityById(userId);
 
-            // Save the availability
-            Availability savedAvailability = availabilityService.saveAvailability(availability, user);
+            // Add availability to user and save
+            user.setAvailabilityId(availability.getAvailabilityId());
+            Users savedUser = userService.saveUser(user);
+
+            //TODO: Continue to work on intergrating suggested changes into Availabilty Layers and UserMenuHandler for the availability setting.
+
+            // Get the last added availability (the one we just added)
+            Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
 
             System.out.println("Availability added: " + availabilityService.mapToData(savedAvailability));
         } catch (Exception e) {

@@ -29,18 +29,22 @@ public class AvailabilityController {
     public AvailabilityData createAvailability(@RequestBody AvailabilityData availabilityData, @RequestParam Long userId) {
         log.info("Requesting Availability Creation: {} for user Id {}", availabilityData, userId);
 
+        Users user = userService.getUserEntityById(userId);
         Availability availability = availabilityService.convertToEntity(availabilityData);
 
-        Users user = userService.getUserEntityById(userId);
+        user.addAvailability(availability);
+        Users savedUser = userService.saveUser(user);
 
-        Availability savedAvailability = availabilityService.saveAvailability(availability, user);
-
+        Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
         return availabilityService.mapToData(savedAvailability);
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AvailabilityData>> getAvailabilitiesByUserId(@PathVariable Long userId) {
-        List<AvailabilityData> availabilities = availabilityService.getAvailabilityByUserId(userId);
+        Users user = userService.getUserEntityById(userId);
+        List<AvailabilityData> availabilities = user.getAvailabilities().stream()
+                .map(availabilityService::mapToData)
+                .toList();
         return ResponseEntity.ok(availabilities);
     }
 
@@ -67,29 +71,14 @@ public class AvailabilityController {
     @DeleteMapping("/user/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvailabilityByUserId(@PathVariable Long userId) {
-        availabilityService.deleteAvailabilityByUserId(userId);
+        Users user = userService.getUserEntityById(userId);
+        user.getAvailabilities().clear();
+        userService.saveUser(user);
     }
 
     @DeleteMapping("/{availabilityId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvailabilityById(@PathVariable Long availabilityId) {
         availabilityService.deleteAvailabilityById(availabilityId);
-    }
-
-    private Availability convertToEntity(AvailabilityData availabilityData) {
-        Availability availability = new Availability();
-        availability.setDayOfWeek(availabilityData.getDayOfWeek());
-        availability.setStartTime(availabilityData.getStartTime());
-        availability.setEndTime(availabilityData.getEndTime());
-        return availability;
-    }
-
-    private AvailabilityData convertToDto(Availability availability) {
-        AvailabilityData dto = new AvailabilityData();
-        dto.setAvailabilityId(availability.getAvailabilityId());
-        dto.setDayOfWeek(availability.getDayOfWeek());
-        dto.setStartTime(availability.getStartTime());
-        dto.setEndTime(availability.getEndTime());
-        return dto;
     }
 }

@@ -95,8 +95,8 @@ public class UserMenuHandler {
         newUser.setPassword(password);
         newUser.setUserEmail(userEmail);
         // TODO: Find out if this HooDoo Works
-        newUser.setAvailabilityId(null);
-        newUser.setGameIds(null);
+//        newUser.setAvailabilityId(null);
+//        newUser.setGameIds(null);
 
         UsersData savedUser = usersService.saveUser(newUser);
         System.out.println("User added: " + savedUser);
@@ -196,6 +196,21 @@ public class UserMenuHandler {
                 currentGameIds.add(Long.parseLong(gameId));
             }
             existingUser.setGameIds(currentGameIds);
+        }
+
+        System.out.println("Update user availability? (leave blank to keep current):");
+        String availabilityIdsInput =scanner.nextLine();
+        if (!availabilityIdsInput.isEmpty()) {
+            // presently wrong because type mismatch
+            Set<Long> currentAvailabilityIds = existingUser.getAvailabilityId();
+            if (currentAvailabilityIds == null) {
+                currentAvailabilityIds = new HashSet<>();
+            }
+            String newAvailabilityIds = availabilityIdsInput.trim().split(",");
+            for (String availabiltiyId : newAvailabilityIds) {
+                currentAvailabilityIds.add(Long.parseLong(availabiltiyId));
+            }
+            existingUser.setAvailabilityId(currentAvailabilityIds);
         }
 
         UsersData updatedUser = usersService.patchUser(existingUser.getUserId(), existingUser);
