@@ -1,6 +1,7 @@
 package com.rulezero.playerconnector.controller;
 
 import com.rulezero.playerconnector.controller.model.UsersData;
+import com.rulezero.playerconnector.entity.Users;
 import com.rulezero.playerconnector.exception.ResourceNotFoundException;
 import com.rulezero.playerconnector.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,14 @@ public class UsersController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UsersData createUser(@RequestBody UsersData usersData) {
-        log.info("Requesting User Creation: {}", usersData);
-        return userService.saveUser(usersData);
+//    public UsersData createUser(@RequestBody UsersData usersData) {
+//        log.info("Requesting User Creation: {}", usersData);
+//        return userService.saveUser(usersData);
+//    }
+    // TODO: working on ensuring whether it is better to pass in Entity or Data level- PT Source code explanation suggests data and Id instead of whole entities.
+    public ResponseEntity<Users> createUser(@RequestBody Users user) {
+        log.info("Requesting User Creation: {}", user);
+        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{userId}")

@@ -2,9 +2,7 @@ package com.rulezero.playerconnector.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +11,6 @@ import java.util.Set;
 
 @Entity
 @Data
-@ToString(exclude={"players","stores"})
-@EqualsAndHashCode(exclude={"players","stores"})
 public class Users {
     @Id
     @Getter
@@ -60,6 +56,29 @@ public class Users {
         availabilities.remove(availability);
     }
 
+    public List<Availability> getUserAvailabilities() {
+        return this.availabilities;
+    }
+
+    public void setUserAvailabilities(List<Availability> availabilities) {
+        this.availabilities = availabilities;
+    }
+
+    // This method can be used when you need to get a single availability
+    public Availability getUserAvailability() {
+        return availabilities.isEmpty() ? null : availabilities.get(0);
+    }
+
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    @JoinTable(
+            name = "game_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "game_id")
+    )
+    private Set<Games> gameUsers = new HashSet<>();
+
+}
+
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private Set<Availability> availabilities = new HashSet<>();
 //
@@ -77,13 +96,3 @@ public class Users {
 //            this.availabilities.removeIf(a -> a.getUser().equals(this));
 //        }
 //    }
-
-    // TODO: These relationships need verification so that their relationships work
-    @ManyToMany(cascade = CascadeType.PERSIST)
-    @JoinTable(
-            name = "game_users",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "game_id")
-    )
-    private Set<Games> gameUsers = new HashSet<>();
-}

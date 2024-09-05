@@ -23,41 +23,63 @@ public class AvailabilityService {
     @Autowired
     private UsersDao usersDao;
 
-    @Transactional
-    public Availability saveAvailability(Availability availability, Users users) {
-        if (users == null || availability == null) {
-            throw new IllegalArgumentException("User and Availability must not be null");
-        }
+//    @Transactional
+//    public Availability saveAvailability(Availability availability, Users users) {
+//        if (users == null || availability == null) {
+//            throw new IllegalArgumentException("User and Availability must not be null");
+//        }
+//
+//        if (availability.getAvailabilityId() != null) {
+//            Optional<Availability> existingAvailability = availabilityDao.findById(availability.getAvailabilityId());
+//
+//            if (existingAvailability.isPresent()) {
+//                Availability availToUpdate = existingAvailability.get();
+//                availToUpdate.setStartTime(availability.getStartTime());
+//                availToUpdate.setEndTime(availability.getEndTime());
+//                availToUpdate.setDayOfWeek(availability.getDayOfWeek());
+//                return availabilityDao.save(availToUpdate);
+//            }
+//        }
+//        // If the availability ID is null or it doesn't exist in the database
+//        availability.setUser(users);
+//        return availabilityDao.save(availability);
+//    }
 
-        if (availability.getAvailabilityId() != null) {
-            Optional<Availability> existingAvailability = availabilityDao.findById(availability.getAvailabilityId());
+    public Availability saveAvailability(Long userId, Availability availability) {
+        Users user = usersDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+        user.getAvailabilities().add(availability);
+        usersDao.save(user);
+        return availability;
+    }
 
-            if (existingAvailability.isPresent()) {
-                Availability availToUpdate = existingAvailability.get();
-                availToUpdate.setStartTime(availability.getStartTime());
-                availToUpdate.setEndTime(availability.getEndTime());
-                availToUpdate.setDayOfWeek(availability.getDayOfWeek());
-                return availabilityDao.save(availToUpdate);
-            }
-        }
-        // If the availability ID is null or it doesn't exist in the database
-        availability.setUser(users);
-        return availabilityDao.save(availability);
+    public Availability getAvailabilityById(Long availabilityId) {
+        return availabilityDao.findById(availabilityId).orElseThrow(() -> new ResourceNotFoundException("Availability not found"));
+    }
+
+//    public AvailabilityData getAvailabilityById(Long availabilityId) {
+//        Availability availability = availabilityDao.findById(availabilityId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + availabilityId));
+//        return mapToData(availability);
+//    }
+
+    public List<Availability> getAllAvailabilities() {
+        return availabilityDao.findAll();
+    }
+
+    public Availability updateAvailability(Long availabilityId, Availability availability) {
+        Availability availabilityToUpdate = getAvailabilityById(availabilityId);
+        // add in fields with getters and setters correctly.
+        return availabilityDao.save(availabilityToUpdate);
     }
 
 
-    public AvailabilityData getAvailabilityById(Long availabilityId) {
-        Availability availability = availabilityDao.findById(availabilityId)
-                .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + availabilityId));
-        return mapToData(availability);
-    }
 
-    public List<AvailabilityData> getAllAvailabilities() {
-        List<Availability> availabilities = availabilityDao.findAll();
-        return availabilities.stream()
-                .map(this::mapToData)
-                .collect(Collectors.toList());
-    }
+//    public List<AvailabilityData> getAllAvailabilities() {
+//        List<Availability> availabilities = availabilityDao.findAll();
+//        return availabilities.stream()
+//                .map(this::mapToData)
+//                .collect(Collectors.toList());
+//    }
 
     public List<AvailabilityData> getAvailabilityByUserId(Long userId) {
         List<Availability> availabilities = availabilityDao.findByUser_UserId(userId);
@@ -100,6 +122,11 @@ public class AvailabilityService {
         availabilityDao.deleteAll(availabilities);
     }
 
+    public void deleteAvailability(Long availabilityId) {
+        Availability availability = getAvailabilityById(availabilityId);
+        availabilityDao.delete(availability);
+    }
+
     @Transactional
     public void deleteAvailabilityById(Long availabilityId) {
         Availability availability = availabilityDao.findById(availabilityId)
@@ -116,6 +143,7 @@ public class AvailabilityService {
         if (availabilityData.getUserId() != null) {
             Users user = usersDao.findById(availabilityData.getUserId())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + availabilityData.getUserId()));
+            availability.setUser(user);
         }
         return availability;
     }

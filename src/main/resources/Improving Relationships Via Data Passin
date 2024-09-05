@@ -1,0 +1,298 @@
+// Entity Layer
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<Availability> availabilities = new ArrayList<>();
+
+    // Other fields, getters, setters
+}
+
+@Entity
+public class Availability {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Other fields, getters, setters
+}
+
+// DAO Layer
+public interface UserDao extends JpaRepository<User, Long> {
+}
+
+public interface AvailabilityDao extends JpaRepository<Availability, Long> {
+}
+
+// Service Layer
+@Service
+public class UserService {
+    @Autowired
+    private UserDao userDao;
+
+    public User createUser(User user) {
+        return userDao.save(user);
+    }
+
+    public User getUserById(Long id) {
+        return userDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    public List<User> getAllUsers() {
+        return userDao.findAll();
+    }
+
+    public User updateUser(Long id, User userDetails) {
+        User user = getUserById(id);
+        // Update user fields
+        return userDao.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        User user = getUserById(id);
+        userDao.delete(user);
+    }
+}
+
+@Service
+public class AvailabilityService {
+    @Autowired
+    private AvailabilityDao availabilityDao;
+    @Autowired
+    private UserDao userDao;
+
+    public Availability createAvailability(Long userId, Availability availability) {
+        User user = userDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.getAvailabilities().add(availability);
+        userDao.save(user);
+        return availability;
+    }
+
+    public Availability getAvailabilityById(Long id) {
+        return availabilityDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("Availability not found"));
+    }
+
+    public List<Availability> getAllAvailabilities() {
+        return availabilityDao.findAll();
+    }
+
+    public Availability updateAvailability(Long id, Availability availabilityDetails) {
+        Availability availability = getAvailabilityById(id);
+        // Update availability fields
+        return availabilityDao.save(availability);
+    }
+
+    public void deleteAvailability(Long id) {
+        Availability availability = getAvailabilityById(id);
+        availabilityDao.delete(availability);
+    }
+}
+
+// Controller Layer
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        return ResponseEntity.ok(userService.updateUser(id, userDetails));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+@RestController
+@RequestMapping("/api/users/{userId}/availabilities")
+public class AvailabilityController {
+    @Autowired
+    private AvailabilityService availabilityService;
+
+    @PostMapping
+    public ResponseEntity<Availability> createAvailability(@PathVariable Long userId, @RequestBody Availability availability) {
+        return new ResponseEntity<>(availabilityService.createAvailability(userId, availability), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Availability> getAvailabilityById(@PathVariable Long id) {
+        return ResponseEntity.ok(availabilityService.getAvailabilityById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Availability>> getAllAvailabilities() {
+        return ResponseEntity.ok(availabilityService.getAllAvailabilities());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Availability> updateAvailability(@PathVariable Long id, @RequestBody Availability availabilityDetails) {
+        return ResponseEntity.ok(availabilityService.updateAvailability(id, availabilityDetails));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAvailability(@PathVariable Long id) {
+        availabilityService.deleteAvailability(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+// MenuHandler Layer
+public class MenuHandler {
+    private Scanner scanner = new Scanner(System.in);
+    private RestTemplate restTemplate = new RestTemplate();
+    private static final String BASE_URL = "http://localhost:8080/api";
+
+    public void handleUserMenu() {
+        while (true) {
+            System.out.println("1. Create User");
+            System.out.println("2. Get User");
+            System.out.println("3. Update User");
+            System.out.println("4. Delete User");
+            System.out.println("5. Back to Main Menu");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    createUser();
+                    break;
+                case 2:
+                    getUser();
+                    break;
+                case 3:
+                    updateUser();
+                    break;
+                case 4:
+                    deleteUser();
+                    break;
+                case 5:
+                    return;
+            }
+        }
+    }
+
+    public void handleAvailabilityMenu() {
+        while (true) {
+            System.out.println("1. Create Availability");
+            System.out.println("2. Get Availability");
+            System.out.println("3. Update Availability");
+            System.out.println("4. Delete Availability");
+            System.out.println("5. Back to Main Menu");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    createAvailability();
+                    break;
+                case 2:
+                    getAvailability();
+                    break;
+                case 3:
+                    updateAvailability();
+                    break;
+                case 4:
+                    deleteAvailability();
+                    break;
+                case 5:
+                    return;
+            }
+        }
+    }
+
+    private void createUser() {
+        System.out.println("Enter user details:");
+        User user = new User();
+        // Set user fields based on input
+        HttpEntity<User> request = new HttpEntity<>(user);
+        ResponseEntity<User> response = restTemplate.postForEntity(BASE_URL + "/users", request, User.class);
+        System.out.println("User created with ID: " + response.getBody().getId());
+    }
+
+    private void getUser() {
+        System.out.println("Enter user ID:");
+        Long id = scanner.nextLong();
+        ResponseEntity<User> response = restTemplate.getForEntity(BASE_URL + "/users/" + id, User.class);
+        System.out.println(response.getBody());
+    }
+
+    private void updateUser() {
+        System.out.println("Enter user ID to update:");
+        Long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+        System.out.println("Enter updated user details:");
+        User user = new User();
+        // Set user fields based on input
+        HttpEntity<User> request = new HttpEntity<>(user);
+        restTemplate.put(BASE_URL + "/users/" + id, request);
+        System.out.println("User updated successfully");
+    }
+
+    private void deleteUser() {
+        System.out.println("Enter user ID to delete:");
+        Long id = scanner.nextLong();
+        restTemplate.delete(BASE_URL + "/users/" + id);
+        System.out.println("User deleted successfully");
+    }
+
+    private void createAvailability() {
+        System.out.println("Enter user ID:");
+        Long userId = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+        System.out.println("Enter availability details:");
+        Availability availability = new Availability();
+        // Set availability fields based on input
+        HttpEntity<Availability> request = new HttpEntity<>(availability);
+        ResponseEntity<Availability> response = restTemplate.postForEntity(BASE_URL + "/users/" + userId + "/availabilities", request, Availability.class);
+        System.out.println("Availability created with ID: " + response.getBody().getId());
+    }
+
+    private void getAvailability() {
+        System.out.println("Enter availability ID:");
+        Long id = scanner.nextLong();
+        ResponseEntity<Availability> response = restTemplate.getForEntity(BASE_URL + "/users/0/availabilities/" + id, Availability.class);
+        System.out.println(response.getBody());
+    }
+
+    private void updateAvailability() {
+        System.out.println("Enter availability ID to update:");
+        Long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+        System.out.println("Enter updated availability details:");
+        Availability availability = new Availability();
+        // Set availability fields based on input
+        HttpEntity<Availability> request = new HttpEntity<>(availability);
+        restTemplate.put(BASE_URL + "/users/0/availabilities/" + id, request);
+        System.out.println("Availability updated successfully");
+    }
+
+    private void deleteAvailability() {
+        System.out.println("Enter availability ID to delete:");
+        Long id = scanner.nextLong();
+        restTemplate.delete(BASE_URL + "/users/0/availabilities/" + id);
+        System.out.println("Availability deleted successfully");
+    }
+}

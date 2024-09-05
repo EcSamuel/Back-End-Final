@@ -19,6 +19,9 @@ public class Availability {
     @Column(nullable = false, length = 64)
     private String startTime;
 
+    @Column(nullable = true, length = 64)
+    private String endTime;
+
     // unidrectional, unneeded code
 //    @Column(nullable = false, length = 64)
 //    private String endTime;

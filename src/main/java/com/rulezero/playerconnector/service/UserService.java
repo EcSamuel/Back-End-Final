@@ -29,10 +29,9 @@ public class UserService {
     private GamesDao gamesDao;
 
     @Transactional
-    public UsersData saveUser(UsersData usersData) {
+    public Users saveUser(UsersData usersData) {
         Users user = convertToEntity(usersData);
-        Users savedUser = usersDao.save(user);
-        return convertToUsersData(savedUser);
+        return usersDao.save(user);
     }
 
     private Users convertToEntity(UsersData usersData) {
@@ -50,7 +49,7 @@ public class UserService {
         if (usersData.getAvailabilityId() != null) {
             Availability availability = availabilityDao.findById(usersData.getAvailabilityId())
                     .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + usersData.getAvailabilityId()));
-            user.setUserAvailability(availability);
+            user.setUserAvailabilities(availability);
         }
 
         if (usersData.getGameIds() != null) {
@@ -74,6 +73,8 @@ public class UserService {
         Users updatedUser = usersDao.save(existingUser);
         return convertToUsersData(updatedUser);
     }
+    // TODO: Revisit? Might not need this one at the moment
+    public Users patchUsers(Long userId, UsersData usersData) throws ResourceNotFoundException {}
 
     private void updateUserFields(Users user, UsersData usersData) {
         if (usersData.getFirstName() != null) {
@@ -114,6 +115,7 @@ public class UserService {
         return usersDao.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
+
     @Transactional
     public void updateUserGames(Users user, Set<Long> gameIds) {
         Set<Games> newGames = gameIds.stream()
@@ -149,6 +151,10 @@ public class UserService {
 
         return convertToUsersData(user);
     }
+    // TODO: Check out Alternative Method where it is called by User instead of UsersData
+    public Users getUsersById(Long userId) {
+        return usersDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    }
 
     public List<UsersData> searchUsersByName(String query) {
         List<Users> users = usersDao.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query);
@@ -162,6 +168,10 @@ public class UserService {
         return users.stream()
                 .map(this::convertToUsersData)
                 .collect(Collectors.toList());
+    }
+
+    public List<Users> getAllTheUsers() {
+        return usersDao.findAll();
     }
 
     private UsersData convertToUsersData(Users user) {
@@ -200,5 +210,19 @@ public class UserService {
         user.setUserAvailability(availability);
         Users updatedUser = usersDao.save(user);
         return convertToUsersData(updatedUser);
+    }
+
+    public void addUserAvailability(Long userId, Long availabilityId) {
+        Users user = getUserEntityById(userId);
+        Availability availability = availabilityService.getAvailabilityById(availabilityId);
+        user.addAvailability(availability);
+        usersDao.save(user);
+    }
+
+    public void removeUserAvailability(Long userId, Long availabilityId) {
+        Users user = getUserEntityById(userId);
+        Availability availability = availabilityService.getAvailabilityById(availabilityId);
+        user.removeAvailability(availability);
+        usersDao.save(user);
     }
 }

@@ -1,6 +1,7 @@
 package com.rulezero.playerconnector.handler;
 
 import com.rulezero.playerconnector.controller.model.UsersData;
+import com.rulezero.playerconnector.entity.Users;
 import com.rulezero.playerconnector.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,6 +55,7 @@ public class UserMenuHandler {
     }
 
     private void addUser() {
+
         System.out.println("Enter first name:");
         String firstName = scanner.nextLine();
 
@@ -98,17 +100,17 @@ public class UserMenuHandler {
 //        newUser.setAvailabilityId(null);
 //        newUser.setGameIds(null);
 
-        UsersData savedUser = usersService.saveUser(newUser);
-        System.out.println("User added: " + savedUser);
+        Users savedUser = usersService.saveUser(newUser);
+        System.out.println("User added: " + savedUser.getUserId() + ": " + savedUser.getFirstName() + " " + savedUser.getLastName());
     }
 
     private void listUsers() {
-        List<UsersData> users = usersService.getAllUsers();
+        List<Users> users = usersService.getAllUsers();
         users.forEach(user -> System.out.println(user.getUserId() + ": " + user.getFirstName() + " " + user.getLastName()));
     }
 
     private void selectAndUpdateUser() {
-        List<UsersData> users = usersService.getAllUsers();
+        List<Users> users = usersService.getAllUsers();
         List<String> userNames = users.stream()
                 .map(user -> user.getUserId() + ": " + user.getFirstName() + " " + user.getLastName())
                 .collect(Collectors.toList());
@@ -120,7 +122,7 @@ public class UserMenuHandler {
 
         int selection = Integer.parseInt(scanner.nextLine()) - 1;
         if (selection >= 0 && selection < users.size()) {
-            UsersData selectedUser = users.get(selection);
+            Users selectedUser = users.get(selection);
             updateUser(selectedUser);
         } else {
             System.out.println("Invalid selection");
@@ -184,37 +186,39 @@ public class UserMenuHandler {
             existingUser.setUserEmail(userEmail);
         }
 
-        System.out.println("Update the user's games? (leave blank to keep current):");
+//        System.out.println("Update the user's games? (leave blank to keep current):");
+//        String gameIdsInput = scanner.nextLine();
+//        if (!gameIdsInput.isEmpty()) {
+//            Set<Long> currentGameIds = existingUser.getGameIds();
+//            if (currentGameIds == null) {
+//                currentGameIds = new HashSet<>();
+//            }
+//            String[] newGameIds = gameIdsInput.trim().split(",");
+//            for (String gameId : newGameIds) {
+//                currentGameIds.add(Long.parseLong(gameId));
+//            }
+//            existingUser.setGameIds(currentGameIds);
+//        }
+
+        System.out.println("Update the user's games? (Enter game IDs separated by commas, or leave blank to keep current):");
         String gameIdsInput = scanner.nextLine();
         if (!gameIdsInput.isEmpty()) {
-            Set<Long> currentGameIds = existingUser.getGameIds();
-            if (currentGameIds == null) {
-                currentGameIds = new HashSet<>();
+            Set<Long> updatedGameIds = new HashSet<>();
+            for (String gameId : gameIdsInput.split(",")) {
+                updatedGameIds.add(Long.parseLong(gameId.trim()));
             }
-            String[] newGameIds = gameIdsInput.trim().split(",");
-            for (String gameId : newGameIds) {
-                currentGameIds.add(Long.parseLong(gameId));
-            }
-            existingUser.setGameIds(currentGameIds);
+            usersService.updateUserGames(existingUser, updatedGameIds);
         }
 
-        System.out.println("Update user availability? (leave blank to keep current):");
-        String availabilityIdsInput =scanner.nextLine();
-        if (!availabilityIdsInput.isEmpty()) {
-            // presently wrong because type mismatch
-            Set<Long> currentAvailabilityIds = existingUser.getAvailabilityId();
-            if (currentAvailabilityIds == null) {
-                currentAvailabilityIds = new HashSet<>();
-            }
-            String newAvailabilityIds = availabilityIdsInput.trim().split(",");
-            for (String availabiltiyId : newAvailabilityIds) {
-                currentAvailabilityIds.add(Long.parseLong(availabiltiyId));
-            }
-            existingUser.setAvailabilityId(currentAvailabilityIds);
+        System.out.println("Update user availability? (Enter availability ID, or leave blank to keep current):");
+        String availabilityIdInput = scanner.nextLine();
+        if (!availabilityIdInput.isEmpty()) {
+            Long availabilityId = Long.parseLong(availabilityIdInput.trim());
+            usersService.updateUserAvailability(existingUser.getUserId(), availabilityId);
         }
 
-        UsersData updatedUser = usersService.patchUser(existingUser.getUserId(), existingUser);
-        System.out.println("User updated: " + updatedUser);
+        Users updatedUser = usersService.patchUser(existingUser.getUserId(), convertToUsersData(existingUser));
+        System.out.println("User updated: " + updatedUser.getUserId() + ": " + updatedUser.getFirstName() + " " + updatedUser.getLastName());
     }
 
     private void deleteUser() {
@@ -223,5 +227,22 @@ public class UserMenuHandler {
 
         usersService.deleteUser(userId);
         System.out.println("User deleted.");
+    }
+
+    private UsersData convertToUsersData(Users user) {
+        UsersData userData = new UsersData();
+        userData.setUserId(user.getUserId());
+        userData.setFirstName(user.getFirstName());
+        userData.setLastName(user.getLastName());
+        userData.setUserPhone(user.getUserPhone());
+        userData.setUserAddress(user.getUserAddress());
+        userData.setUserCity(user.getUserCity());
+        userData.setUserRegion(user.getUserRegion());
+        userData.setUserLoginName(user.getUserLoginName());
+        userData.setUserEmail(user.getUserEmail());
+        // Don't set the password here for security reasons
+        userData.setAvailabilityId(user.getUserAvailability() != null ? user.getUserAvailability().getAvailabilityId() : null);
+        userData.setGameIds(user.getGameUsers().stream().map(game -> game.getGameId()).collect(Collectors.toSet()));
+        return userData;
     }
 }
