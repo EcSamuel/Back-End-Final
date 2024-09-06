@@ -36,7 +36,8 @@ public class AvailabilityMenuHandler {
             int selection = getUserSelection(availabilityMenu);
             switch (selection) {
                 // TODO: Verify addAvailability
-                case 1 -> addAvailability();
+//                case 1 -> addAvailability();
+                case 1 -> addAvailabilityIndependently();
                 // TODO: Verify listAvailabilities
                 case 2 -> listAvailabilities();
                 // TODO: Verify selectAndUpdateAvailability
@@ -56,10 +57,7 @@ public class AvailabilityMenuHandler {
         return Integer.parseInt(scanner.nextLine());
     }
 
-    private void addAvailability() {
-        System.out.println("Enter user Id:");
-        Long userId = Long.parseLong(scanner.nextLine());
-
+    private void addAvailabilityIndependently() {
         System.out.println("Enter day of week:");
         String dayOfWeek = scanner.nextLine();
 
@@ -73,31 +71,57 @@ public class AvailabilityMenuHandler {
         newAvailability.setDayOfWeek(dayOfWeek);
         newAvailability.setStartTime(startTime);
         newAvailability.setEndTime(endTime);
-        newAvailability.setUserId(userId);
-        // ^this might be a problem for a unidirectional^
-            // do I need this?
+
+        try {
+            Availability availability = availabilityService.convertToEntity(newAvailability);
+
+            Availability savedAvailability = availabilityService.saveAvailabilityIndependently(availability);
+        } catch (Exception e) {
+            System.out.println("Error adding availability: " + e.getMessage());
+        }
+    }
+
+//    private void addAvailability() {
+//        System.out.println("Enter user Id:");
+//        Long userId = Long.parseLong(scanner.nextLine());
+//
+//        System.out.println("Enter day of week:");
+//        String dayOfWeek = scanner.nextLine();
+//
+//        System.out.println("Enter start time:");
+//        String startTime = scanner.nextLine();
+//
+//        System.out.println("Enter end time:");
+//        String endTime = scanner.nextLine();
+//
+//        AvailabilityData newAvailability = new AvailabilityData();
+//        newAvailability.setDayOfWeek(dayOfWeek);
+//        newAvailability.setStartTime(startTime);
+//        newAvailability.setEndTime(endTime);
+////        newAvailability.setUserId(userId);
+//        // ^this might be a problem for a unidirectional^
+//            // do I need this?
 //        try {
 //            // Convert AvailabilityData to Availability entity
 //            Availability availability = availabilityService.convertToEntity(newAvailability);
 //
 //            // Fetch the User entity
 //            Users user = userService.getUserEntityById(userId);
-//
+////
 //            // Add availability to user and save
-//            user.setAvailabilityId(availability.getAvailabilityId());
+//            user.addAvailability(availability);
 //            Users savedUser = userService.saveUser(user);
-//
-//            //TODO: Continue to work on intergrating suggested changes into Availabilty Layers and UserMenuHandler for the availability setting.
-//
+////
+////            //TODO: Continue to work on intergrating suggested changes into Availabilty Layers and UserMenuHandler for the availability setting.
+////
 //            // Get the last added availability (the one we just added)
 //            Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
-//
+////
 //            System.out.println("Availability added: " + availabilityService.mapToData(savedAvailability));
 //        } catch (Exception e) {
 //            System.out.println("Error adding availability: " + e.getMessage());
 //        }
-    }
-// TODO: saveAvailability might be expecting two things passed in, one having to do with Users of some form. This might be resolved, or the problem is facing elsewhere
+//    }
     private void listAvailabilities() {
         List<AvailabilityData> availabilities = availabilityService.getAllAvailabilities();
         availabilities.forEach(availability -> System.out.println(availability.getAvailabilityId() + ": " + availability.getDayOfWeek() + " " + availability.getStartTime() + " - " + availability.getEndTime()));

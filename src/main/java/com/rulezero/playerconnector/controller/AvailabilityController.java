@@ -28,6 +28,7 @@ public class AvailabilityController {
     @Autowired
     private UserService userService;
 
+    // TODO: This post request is no longer formatted in a way that allows for standard requests to make it in.
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AvailabilityData createAvailability(@RequestBody AvailabilityData availabilityData, @RequestParam Long userId) {

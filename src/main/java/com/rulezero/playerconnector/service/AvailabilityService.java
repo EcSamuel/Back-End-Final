@@ -45,6 +45,10 @@ public class AvailabilityService {
 //        return availabilityDao.save(availability);
 //    }
 
+    public Availability saveAvailabilityIndependently(Availability availability) {
+        return availabilityDao.save(availability);
+    }
+
     public Availability saveAvailability(Long userId, Availability availability) {
         Users user = usersDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found!"));
         user.getAvailabilities().add(availability);
