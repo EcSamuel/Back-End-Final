@@ -75,27 +75,27 @@ public class AvailabilityMenuHandler {
         newAvailability.setEndTime(endTime);
         newAvailability.setUserId(userId);
         // ^this might be a problem for a unidirectional^
-
-        try {
-            // Convert AvailabilityData to Availability entity
-            Availability availability = availabilityService.convertToEntity(newAvailability);
-
-            // Fetch the User entity
-            Users user = userService.getUserEntityById(userId);
-
-            // Add availability to user and save
-            user.setAvailabilityId(availability.getAvailabilityId());
-            Users savedUser = userService.saveUser(user);
-
-            //TODO: Continue to work on intergrating suggested changes into Availabilty Layers and UserMenuHandler for the availability setting.
-
-            // Get the last added availability (the one we just added)
-            Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
-
-            System.out.println("Availability added: " + availabilityService.mapToData(savedAvailability));
-        } catch (Exception e) {
-            System.out.println("Error adding availability: " + e.getMessage());
-        }
+            // do I need this?
+//        try {
+//            // Convert AvailabilityData to Availability entity
+//            Availability availability = availabilityService.convertToEntity(newAvailability);
+//
+//            // Fetch the User entity
+//            Users user = userService.getUserEntityById(userId);
+//
+//            // Add availability to user and save
+//            user.setAvailabilityId(availability.getAvailabilityId());
+//            Users savedUser = userService.saveUser(user);
+//
+//            //TODO: Continue to work on intergrating suggested changes into Availabilty Layers and UserMenuHandler for the availability setting.
+//
+//            // Get the last added availability (the one we just added)
+//            Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
+//
+//            System.out.println("Availability added: " + availabilityService.mapToData(savedAvailability));
+//        } catch (Exception e) {
+//            System.out.println("Error adding availability: " + e.getMessage());
+//        }
     }
 // TODO: saveAvailability might be expecting two things passed in, one having to do with Users of some form. This might be resolved, or the problem is facing elsewhere
     private void listAvailabilities() {

@@ -3,6 +3,7 @@ package com.rulezero.playerconnector.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,9 +12,10 @@ import java.util.Set;
 
 @Entity
 @Data
+@Getter
+@Setter
 public class Users {
     @Id
-    @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // Maps to user_id in your SQL
 
@@ -46,7 +48,7 @@ public class Users {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
-    private List<Availability> availabilities = new ArrayList<>();
+    private Set<Availability> availabilities = new HashSet<>();
 
     public void addAvailability(Availability availability) {
         availabilities.add(availability);
@@ -56,17 +58,13 @@ public class Users {
         availabilities.remove(availability);
     }
 
-    public List<Availability> getUserAvailabilities() {
-        return this.availabilities;
-    }
-
-    public void setUserAvailabilities(List<Availability> availabilities) {
+    public void setUserAvailabilities(Set<Availability> availabilities) {
         this.availabilities = availabilities;
     }
 
     // This method can be used when you need to get a single availability
     public Availability getUserAvailability() {
-        return availabilities.isEmpty() ? null : availabilities.get(0);
+        return availabilities.isEmpty() ? null : availabilities.iterator().next();
     }
 
     @ManyToMany(cascade = CascadeType.PERSIST)
@@ -77,6 +75,14 @@ public class Users {
     )
     private Set<Games> gameUsers = new HashSet<>();
 
+//    public void setUserAvailability(Availability availability) {
+//        if (availability != null) {
+//            availability.setUser(this);
+//            this.availabilities.add(availability);
+//        } else {
+//            this.availabilities.removeIf(a -> a.getUser().equals(this));
+//        }
+//    }
 }
 
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -88,11 +94,4 @@ public class Users {
 //                .orElse(null);
 //    }
 //
-//    public void setUserAvailability(Availability availability) {
-//        if (availability != null) {
-//            availability.setUser(this);
-//            this.availabilities.add(availability);
-//        } else {
-//            this.availabilities.removeIf(a -> a.getUser().equals(this));
-//        }
-//    }
+

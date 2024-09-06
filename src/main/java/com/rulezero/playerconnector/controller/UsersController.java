@@ -28,9 +28,9 @@ public class UsersController {
 //        return userService.saveUser(usersData);
 //    }
     // TODO: working on ensuring whether it is better to pass in Entity or Data level- PT Source code explanation suggests data and Id instead of whole entities.
-    public ResponseEntity<Users> createUser(@RequestBody Users user) {
-        log.info("Requesting User Creation: {}", user);
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
+    public ResponseEntity<Users> createUser(@RequestBody UsersData usersData) {
+        log.info("Requesting User Creation: {}", usersData);
+        return new ResponseEntity<>(userService.saveUser(usersData), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{userId}")

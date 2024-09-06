@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,7 +50,9 @@ public class UserService {
         if (usersData.getAvailabilityId() != null) {
             Availability availability = availabilityDao.findById(usersData.getAvailabilityId())
                     .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + usersData.getAvailabilityId()));
-            user.setUserAvailabilities(availability);
+            Set<Availability> availabilities = new HashSet<>();
+            availabilities.add(availability);
+            user.setAvailabilities(availabilities);
         }
 
         if (usersData.getGameIds() != null) {
@@ -73,8 +76,6 @@ public class UserService {
         Users updatedUser = usersDao.save(existingUser);
         return convertToUsersData(updatedUser);
     }
-    // TODO: Revisit? Might not need this one at the moment
-    public Users patchUsers(Long userId, UsersData usersData) throws ResourceNotFoundException {}
 
     private void updateUserFields(Users user, UsersData usersData) {
         if (usersData.getFirstName() != null) {
@@ -104,7 +105,7 @@ public class UserService {
         if (usersData.getAvailabilityId() != null) {
             Availability availability = availabilityDao.findById(usersData.getAvailabilityId())
                     .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + usersData.getAvailabilityId()));
-            user.setUserAvailability(availability);
+            user.addAvailability(availability);
         }
         if (usersData.getGameIds() != null) {
             updateUserGames(user, usersData.getGameIds());
@@ -176,6 +177,7 @@ public class UserService {
 
     private UsersData convertToUsersData(Users user) {
         UsersData usersData = new UsersData();
+        Availability userAvailability = user.getUserAvailability();
         usersData.setUserId(user.getUserId());
         usersData.setFirstName(user.getFirstName());
         usersData.setLastName(user.getLastName());
@@ -185,7 +187,7 @@ public class UserService {
         usersData.setUserRegion(user.getUserRegion());
         usersData.setUserLoginName(user.getUserLoginName());
         usersData.setUserEmail(user.getUserEmail());
-        usersData.setAvailabilityId(user.getUserAvailability() != null ? user.getUserAvailability().getAvailabilityId() : null);
+        usersData.setAvailabilityId(userAvailability != null ? userAvailability.getAvailabilityId() : null);
         usersData.setGameIds(user.getGameUsers().stream().map(Games::getGameId).collect(Collectors.toSet()));
         return usersData;
     }
@@ -207,22 +209,22 @@ public class UserService {
         Availability availability = availabilityDao.findById(availabilityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Availability not found with id: " + availabilityId));
 
-        user.setUserAvailability(availability);
+        user.addAvailability(availability);
         Users updatedUser = usersDao.save(user);
         return convertToUsersData(updatedUser);
     }
 
-    public void addUserAvailability(Long userId, Long availabilityId) {
-        Users user = getUserEntityById(userId);
-        Availability availability = availabilityService.getAvailabilityById(availabilityId);
-        user.addAvailability(availability);
-        usersDao.save(user);
-    }
+//    public void addUserAvailability(Long userId, Long availabilityId) {
+//        Users user = getUserEntityById(userId);
+//        Availability availability = availabilityService.getAvailabilityById(availabilityId);
+//        user.addAvailability(availability);
+//        usersDao.save(user);
+//    }
 
-    public void removeUserAvailability(Long userId, Long availabilityId) {
-        Users user = getUserEntityById(userId);
-        Availability availability = availabilityService.getAvailabilityById(availabilityId);
-        user.removeAvailability(availability);
-        usersDao.save(user);
-    }
+//    public void removeUserAvailability(Long userId, Long availabilityId) {
+//        Users user = getUserEntityById(userId);
+//        Availability availability = availabilityService.getAvailabilityById(availabilityId);
+//        user.removeAvailability(availability);
+//        usersDao.save(user);
+//    }
 }

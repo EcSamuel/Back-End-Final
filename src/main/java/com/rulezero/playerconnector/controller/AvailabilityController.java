@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,8 @@ public class AvailabilityController {
         user.addAvailability(availability);
         Users savedUser = userService.saveUser(convertToUsersData(user));
 
-        Availability savedAvailability = savedUser.getAvailabilities().get(savedUser.getAvailabilities().size() - 1);
+        List<Availability> availabilitiesList = new ArrayList<>(savedUser.getAvailabilities());
+        Availability savedAvailability = availabilitiesList.get(availabilitiesList.size() - 1);
         return availabilityService.mapToData(savedAvailability);
     }
 
@@ -68,16 +70,14 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilities);
     }
 
-    @GetMapping
-    public ResponseEntity<List<AvailabilityData>> getAllAvailabilities() {
-        List<AvailabilityData> availabilities = availabilityService.getAllAvailabilities();
-        return ResponseEntity.ok(availabilities);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Availability>> getAllAvailabilities() {
+//        return ResponseEntity.ok(availabilityService.getAllAvailabilities());
+//    }
 
     @GetMapping("/{availabilityId}")
-    public ResponseEntity<AvailabilityData> getAvailabilityById(@PathVariable Long availabilityId) {
-        AvailabilityData availability = availabilityService.getAvailabilityById(availabilityId);
-        return ResponseEntity.ok(availability);
+    public ResponseEntity<Availability> getAvailabilityById(@PathVariable Long id) {
+        return ResponseEntity.ok(availabilityService.getAvailabilityById(id));
     }
 
     @PutMapping("/{availabilityId}")
@@ -87,14 +87,15 @@ public class AvailabilityController {
         AvailabilityData updatedAvailability = availabilityService.updateAvailability(availabilityId, availabilityData);
         return ResponseEntity.ok(updatedAvailability);
     }
-
-    @DeleteMapping("/user/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAvailabilityByUserId(@PathVariable Long userId) {
-        Users user = userService.getUserEntityById(userId);
-        user.getAvailabilities().clear();
-        userService.saveUser(user);
-    }
+        // Broken, wrong, and possibly unused
+//    @DeleteMapping("/user/{userId}")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    public void deleteAvailabilityByUserId(@PathVariable Long userId) {
+//
+//        UsersData savedUser = userService.saveUser(convertToUsersData(userId));
+//        savedUser.getAvailabilities().clear();
+//        userService.saveUser(user);
+//    }
 
     @DeleteMapping("/{availabilityId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -62,8 +62,22 @@ public class AvailabilityService {
 //        return mapToData(availability);
 //    }
 
-    public List<Availability> getAllAvailabilities() {
-        return availabilityDao.findAll();
+    public List<AvailabilityData> getAllAvailabilities() {
+        List<Availability> availabilities = availabilityDao.findAll();
+        return availabilities.stream()
+                .map(this::convertToAvailabilitiesData)
+                .collect(Collectors.toList());
+    }
+
+
+
+    private AvailabilityData convertToAvailabilitiesData(Availability availability) {
+        AvailabilityData availabilityData = new AvailabilityData();
+        availabilityData.setAvailabilityId(availability.getAvailabilityId());
+        availabilityData.setDayOfWeek(availability.getDayOfWeek());
+        availabilityData.setStartTime(availability.getStartTime());
+        availabilityData.setEndTime(availability.getEndTime());
+        return availabilityData;
     }
 
     public Availability updateAvailability(Long availabilityId, Availability availability) {
@@ -80,11 +94,11 @@ public class AvailabilityService {
 //                .map(this::mapToData)
 //                .collect(Collectors.toList());
 //    }
-
-    public List<AvailabilityData> getAvailabilityByUserId(Long userId) {
-        List<Availability> availabilities = availabilityDao.findByUser_UserId(userId);
-        return availabilities.stream().map(this::mapToData).collect(Collectors.toList());
-    }
+    // TODO: Rewrite on the user side to remove over here since unidirectional. Might need to reconfigure on the MenuHandler as well.
+//    public List<AvailabilityData> getAvailabilityByUserId(Long userId) {
+//        List<Availability> availabilities = availabilityDao.findByUser_UserId(userId);
+//        return availabilities.stream().map(this::mapToData).collect(Collectors.toList());
+//    }
 
     public AvailabilityData mapToData(Availability availability) {
         AvailabilityData data = new AvailabilityData();
@@ -92,7 +106,7 @@ public class AvailabilityService {
         data.setDayOfWeek(availability.getDayOfWeek());
         data.setStartTime(availability.getStartTime());
         data.setEndTime(availability.getEndTime());
-        data.setUserId(availability.getUser().getUserId());
+//        data.setUserId(availability.getUser().getUserId());
         return data;
     }
 
@@ -116,11 +130,12 @@ public class AvailabilityService {
         return mapToData(updatedAvailability);
     }
 
-    @Transactional
-    public void deleteAvailabilityByUserId(Long userId) {
-        List<Availability> availabilities = availabilityDao.findByUser_UserId(userId);
-        availabilityDao.deleteAll(availabilities);
-    }
+    // TODO: Rewrite on User side or delete altogether
+//    @Transactional
+//    public void deleteAvailabilityByUserId(Long userId) {
+//        List<Availability> availabilities = availabilityDao.findByUser_UserId(userId);
+//        availabilityDao.deleteAll(availabilities);
+//    }
 
     public void deleteAvailability(Long availabilityId) {
         Availability availability = getAvailabilityById(availabilityId);
@@ -140,11 +155,11 @@ public class AvailabilityService {
         availability.setDayOfWeek(availabilityData.getDayOfWeek());
         availability.setStartTime(availabilityData.getStartTime());
         availability.setEndTime(availabilityData.getEndTime());
-        if (availabilityData.getUserId() != null) {
-            Users user = usersDao.findById(availabilityData.getUserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + availabilityData.getUserId()));
-            availability.setUser(user);
-        }
+//        if (availabilityData.getUserId() != null) {
+//            Users user = usersDao.findById(availabilityData.getUserId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + availabilityData.getUserId()));
+//            availability.setUser(user);
+//        }
         return availability;
     }
 

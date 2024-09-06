@@ -105,12 +105,12 @@ public class UserMenuHandler {
     }
 
     private void listUsers() {
-        List<Users> users = usersService.getAllUsers();
+        List<UsersData> users = usersService.getAllUsers();
         users.forEach(user -> System.out.println(user.getUserId() + ": " + user.getFirstName() + " " + user.getLastName()));
     }
 
     private void selectAndUpdateUser() {
-        List<Users> users = usersService.getAllUsers();
+        List<UsersData> users = usersService.getAllUsers();
         List<String> userNames = users.stream()
                 .map(user -> user.getUserId() + ": " + user.getFirstName() + " " + user.getLastName())
                 .collect(Collectors.toList());
@@ -122,7 +122,7 @@ public class UserMenuHandler {
 
         int selection = Integer.parseInt(scanner.nextLine()) - 1;
         if (selection >= 0 && selection < users.size()) {
-            Users selectedUser = users.get(selection);
+            UsersData selectedUser = users.get(selection);
             updateUser(selectedUser);
         } else {
             System.out.println("Invalid selection");
@@ -207,17 +207,17 @@ public class UserMenuHandler {
             for (String gameId : gameIdsInput.split(",")) {
                 updatedGameIds.add(Long.parseLong(gameId.trim()));
             }
-            usersService.updateUserGames(existingUser, updatedGameIds);
+            existingUser.setGameIds(updatedGameIds);
         }
 
         System.out.println("Update user availability? (Enter availability ID, or leave blank to keep current):");
         String availabilityIdInput = scanner.nextLine();
         if (!availabilityIdInput.isEmpty()) {
             Long availabilityId = Long.parseLong(availabilityIdInput.trim());
-            usersService.updateUserAvailability(existingUser.getUserId(), availabilityId);
+            existingUser.setAvailabilityId(availabilityId);
         }
 
-        Users updatedUser = usersService.patchUser(existingUser.getUserId(), convertToUsersData(existingUser));
+        UsersData updatedUser = usersService.patchUser(existingUser.getUserId(), existingUser);
         System.out.println("User updated: " + updatedUser.getUserId() + ": " + updatedUser.getFirstName() + " " + updatedUser.getLastName());
     }
 
