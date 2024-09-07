@@ -171,10 +171,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<Users> getAllTheUsers() {
-        return usersDao.findAll();
-    }
-
     private UsersData convertToUsersData(Users user) {
         UsersData usersData = new UsersData();
         Availability userAvailability = user.getUserAvailability();
