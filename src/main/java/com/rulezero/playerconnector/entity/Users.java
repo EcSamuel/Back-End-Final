@@ -15,6 +15,8 @@ import java.util.Set;
 @Getter
 @Setter
 public class Users {
+
+    //Primary Key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // Maps to user_id in your SQL
@@ -46,10 +48,12 @@ public class Users {
     @Column(nullable = false, unique = true)
     private String userEmail;
 
+    // One to Many Relationship for User and Availability. Availability needs to be deleted upon user removal to prevent orphans since the assignment required a one to many relationship (even though a real project structure would benefit from this being many to many)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private Set<Availability> availabilities = new HashSet<>();
 
+    // helper methods for user- availability relationship
     public void addAvailability(Availability availability) {
         availabilities.add(availability);
     }
@@ -67,6 +71,7 @@ public class Users {
         return availabilities.isEmpty() ? null : availabilities.iterator().next();
     }
 
+    //Many to Many relationship between users and games (from the owning side)
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "game_users",
@@ -75,6 +80,7 @@ public class Users {
     )
     private Set<Games> gameUsers = new HashSet<>();
 
+    // Code I am no longer running but wanted to reexamine later
 //    public void setUserAvailability(Availability availability) {
 //        if (availability != null) {
 //            availability.setUser(this);
