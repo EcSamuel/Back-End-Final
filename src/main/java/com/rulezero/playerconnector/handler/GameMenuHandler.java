@@ -24,6 +24,7 @@ public class GameMenuHandler {
 
     private Scanner scanner = new Scanner(System.in);
 
+    //Top level menu
     public void process() {
         List<String> gameMenu = List.of(
                 "1) Add a Game",
@@ -37,13 +38,9 @@ public class GameMenuHandler {
         while (!back) {
             int selection = getUserSelection(gameMenu);
             switch (selection) {
-                // TODO: Verify addGame
                 case 1 -> addGame();
-                // TODO: Verify listGames
                 case 2 -> listGames();
-                // TODO: Verify selectAndUpdateGame- Presently throwing a LAZY initialization exception, possibly connected to the players field, so a relational issue
                 case 3 -> selectAndUpdateGame();
-                // TODO: Verify deleteGame
                 case 4 -> deleteGame();
                 case 0 -> back = true;
                 default -> System.out.println("Invalid selection");
@@ -71,6 +68,7 @@ public class GameMenuHandler {
         System.out.println("Enter Maximum players");
         int maxPlayers = Integer.parseInt(scanner.nextLine());
 
+        //GamesData setters 
         GamesData newGame = new GamesData();
         newGame.setGameName(gameName);
         newGame.setGameDescription(gameDescription);
@@ -78,6 +76,7 @@ public class GameMenuHandler {
         newGame.setMaxPlayers(maxPlayers);
         newGame.setGameUsers(null);
 
+        //Data Layer gets applied to Service
         GamesData savedGame =gamesService.saveGame(newGame);
         System.out.println("Game attempting add" +savedGame);
     }
@@ -107,6 +106,7 @@ public class GameMenuHandler {
         }
     }
 
+    //inputs from update option go here
     private void updateGame(GamesData existingGame) {
         System.out.println("Updating game: " + existingGame.getGameName());
 
@@ -133,7 +133,7 @@ public class GameMenuHandler {
         if (!maxPlayersInput.isEmpty()) {
             existingGame.setMaxPlayers(Integer.parseInt(maxPlayersInput));
         }
-        // TODO: This is new and needs to be verified both structure and logic-wise. If it works, apply similar methods to other handler calls.
+        
         System.out.println("Update players for the game? (enter player IDs separated by commas, leave blank to keep current):");
         String gameUserIdsInput = scanner.nextLine();
         if (!gameUserIdsInput.isEmpty()) {
