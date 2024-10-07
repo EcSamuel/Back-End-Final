@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * REST Controller for managing user operations.
+ * This controller handles all user-related HTTP requests including user creation, updates,
+ * searches, and deletions. It also manages user availability associations and bulk operations.
+ * The controller delegates business logic to the UserService while handling HTTP-specific concerns.
+ */
 @RestController
 @RequestMapping("/users")
 @Slf4j
@@ -21,18 +27,36 @@ public class UsersController {
     @Autowired
     private UserService userService;
 
+    /**
+     * Creates a new user in the system.
+     * Note: Currently returns Users entity directly - under review for potential change
+     * to return UsersData instead, following best practices for DTO usage.
+     *
+     * @param usersData The user data for creating the new user
+     * @return ResponseEntity containing the created user entity and CREATED status
+     * @throws IllegalArgumentException if the user data is invalid
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
 //    public UsersData createUser(@RequestBody UsersData usersData) {
 //        log.info("Requesting User Creation: {}", usersData);
 //        return userService.saveUser(usersData);
 //    }
-    // TODO: working on ensuring whether it is better to pass in Entity or Data level- PT Source code explanation suggests data and Id instead of whole entities.
     public ResponseEntity<Users> createUser(@RequestBody UsersData usersData) {
         log.info("Requesting User Creation: {}", usersData);
         return new ResponseEntity<>(userService.saveUser(usersData), HttpStatus.CREATED);
     }
 
+    
+    /**
+     * Partially updates an existing user's information.
+     * Only the provided fields in the request body will be updated.
+     *
+     * @param userId The ID of the user to update
+     * @param usersData The partial user data containing only the fields to be updated
+     * @return ResponseEntity containing the updated user data if successful,
+     *         or appropriate error status if the update fails
+     */
     @PatchMapping("/{userId}")
     public ResponseEntity<UsersData> partiallyUpdateUser(@PathVariable Long userId, @RequestBody UsersData usersData) {
         try {
@@ -45,6 +69,13 @@ public class UsersController {
         }
     }
 
+    /**
+     * Retrieves a specific user by their ID.
+     *
+     * @param userId The ID of the user to retrieve
+     * @return ResponseEntity containing the user data if found,
+     *         or NOT_FOUND status if the user doesn't exist
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<UsersData> getUserById(@PathVariable Long userId) {
         try {
@@ -55,6 +86,14 @@ public class UsersController {
         }
     }
 
+    /**
+     * Searches for users based on a query string.
+     * The search is performed on user names and returns matching results.
+     *
+     * @param query The search query string to match against user names
+     * @return List of users matching the search query. Returns an empty list if the query is null or empty,
+     *         or if no matches are found
+     */
     @GetMapping("/search")
     public List<UsersData> searchUsers(@RequestParam String query) {
         log.info("Requesting User Search: {}", query);
@@ -66,6 +105,15 @@ public class UsersController {
         }
     }
 
+    /**
+     * Deletes a specific user from the system.
+     *
+     * @param userId The ID of the user to delete
+     * @return ResponseEntity with:
+     *         - NO_CONTENT status if deletion is successful
+     *         - NOT_FOUND status if the user doesn't exist
+     *         - INTERNAL_SERVER_ERROR status if deletion fails for other reasons
+     */
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
@@ -80,12 +128,26 @@ public class UsersController {
         }
     }
 
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return List of all users in the system
+     */
     @GetMapping
     public List<UsersData> getAllUsers() {
         log.info("Requesting All Users");
         return userService.getAllUsers();
     }
 
+    /**
+     * Updates a user's availability association.
+     * Links a specific availability schedule to a user.
+     *
+     * @param userId The ID of the user to update
+     * @param availabilityId The ID of the availability schedule to associate with the user
+     * @return ResponseEntity containing the updated user data if successful,
+     *         or appropriate error status if the update fails
+     */
     @PatchMapping("/{userId}/availability")
     public ResponseEntity<UsersData> updateUserAvailability(@PathVariable Long userId, @RequestParam Long availabilityId) {
         log.info("Updating availability for User {}: {}", userId, availabilityId);
@@ -99,6 +161,14 @@ public class UsersController {
         }
     }
 
+    /**
+     * Performs bulk deletion of multiple users.
+     *
+     * @param userIds List of user IDs to delete
+     * @return ResponseEntity with:
+     *         - NO_CONTENT status if all deletions are successful
+     *         - INTERNAL_SERVER_ERROR status if any deletion fails
+     */
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteUsers(@RequestBody List<Long> userIds) {
