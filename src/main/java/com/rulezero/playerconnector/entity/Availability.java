@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Availability {
 
+    //Primary Key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long availabilityId;
