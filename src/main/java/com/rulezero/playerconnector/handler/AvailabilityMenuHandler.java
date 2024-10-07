@@ -14,14 +14,17 @@ import java.util.stream.Collectors;
 @Component
 public class AvailabilityMenuHandler {
 
+    // Unneeded in certain iterations of Java, but for j21 needed
     @Autowired
     private AvailabilityService availabilityService;
 
     @Autowired
     private UserService userService;
-
+    
+    //Scanner creates the user input on the CLI-based menu
     private Scanner scanner = new Scanner(System.in);
 
+    // top level menu- needs to list the options for CRUD for availability
     public void process() {
         List<String> availabilityMenu = List.of(
                 "1) Add Availability",
@@ -30,7 +33,7 @@ public class AvailabilityMenuHandler {
                 "4) Delete Availability",
                 "0) Back"
         );
-
+        // while the menu doesn't take the input of zero, there needs to be a case/switch menu that allows the next function to run
         boolean back = false;
         while (!back) {
             int selection = getUserSelection(availabilityMenu);
@@ -49,7 +52,8 @@ public class AvailabilityMenuHandler {
             }
         }
     }
-
+// each menu button defined below
+    // User selection needs to say what the user should input and then prompt the next field once the value is accepted. Presently lacks data validation.
     private int getUserSelection(List<String> menu) {
         System.out.println("\nMake a selection:");
         menu.forEach(System.out::println);
@@ -57,6 +61,7 @@ public class AvailabilityMenuHandler {
         return Integer.parseInt(scanner.nextLine());
     }
 
+    // runs through the availability options to make sure the fields are populated. Presently lacks data validation.
     private void addAvailabilityIndependently() {
         System.out.println("Enter day of week:");
         String dayOfWeek = scanner.nextLine();
@@ -72,6 +77,7 @@ public class AvailabilityMenuHandler {
         newAvailability.setStartTime(startTime);
         newAvailability.setEndTime(endTime);
 
+        // important try/catch loop to make sure the entity level changes get accepted correctly, or expresses if they aren't.
         try {
             Availability availability = availabilityService.convertToEntity(newAvailability);
 
@@ -80,7 +86,7 @@ public class AvailabilityMenuHandler {
             System.out.println("Error adding availability: " + e.getMessage());
         }
     }
-
+// Bad code that ended up not being needed after reconfiguring the availability relationship from bidirectional to unidirectional
 //    private void addAvailability() {
 //        System.out.println("Enter user Id:");
 //        Long userId = Long.parseLong(scanner.nextLine());
@@ -122,11 +128,14 @@ public class AvailabilityMenuHandler {
 //            System.out.println("Error adding availability: " + e.getMessage());
 //        }
 //    }
+
+    // Need to list availabilities. Best achieved with a forEach loop.
     private void listAvailabilities() {
         List<AvailabilityData> availabilities = availabilityService.getAllAvailabilities();
         availabilities.forEach(availability -> System.out.println(availability.getAvailabilityId() + ": " + availability.getDayOfWeek() + " " + availability.getStartTime() + " - " + availability.getEndTime()));
     }
 
+    
     private void selectAndUpdateAvailability() {
         List<AvailabilityData> availabilities = availabilityService.getAllAvailabilities();
         List<String> availabilityDescriptions = availabilities.stream()
@@ -147,6 +156,7 @@ public class AvailabilityMenuHandler {
         }
     }
 
+    // Update Availability
     private void updateAvailability(AvailabilityData existingAvailability) {
         System.out.println("Updating availability: " + existingAvailability.getDayOfWeek() + " " + existingAvailability.getStartTime() + " - " + existingAvailability.getEndTime());
 
@@ -171,7 +181,8 @@ public class AvailabilityMenuHandler {
         AvailabilityData updatedAvailability = availabilityService.updateAvailability(existingAvailability.getAvailabilityId(), existingAvailability);
         System.out.println("Availability updated: " + updatedAvailability);
     }
-
+    
+    // Delete Availability
     private void deleteAvailability() {
         System.out.println("Enter availability ID to delete:");
         Long availabilityId = Long.parseLong(scanner.nextLine());
