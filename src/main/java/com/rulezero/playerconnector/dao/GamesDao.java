@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+//Repository or Dao Level
 @Repository
 public interface GamesDao extends JpaRepository<Games, Long> {
     List<Games> findByNameContainingIgnoreCase(String name);
