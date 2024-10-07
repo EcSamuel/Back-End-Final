@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Set;
 
+//Column level information for the MySQL Database
 @Data
 public class GamesData {
     private Long gameId;
