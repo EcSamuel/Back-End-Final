@@ -12,6 +12,7 @@ import java.util.Set;
 @Data
 public class Games {
 
+    //Primary Key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gameId;
@@ -28,12 +29,13 @@ public class Games {
     @Column
     private String description;
 
+    //Many to Many for Games and Users Relationship
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "gameUsers", fetch = FetchType.EAGER)
     private Set<Users> gameUsers = new HashSet<>();
 
-    // Helper methods for managing players
+    // Helper methods for managing game users
     public void addGameUser(Users user) {
         this.gameUsers.add(user);
         user.getGameUsers().add(this);
