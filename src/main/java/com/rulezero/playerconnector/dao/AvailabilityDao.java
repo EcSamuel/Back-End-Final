@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+//Repository or Dao Level
 @Repository
 public interface AvailabilityDao extends JpaRepository<Availability, Long> {
 }
