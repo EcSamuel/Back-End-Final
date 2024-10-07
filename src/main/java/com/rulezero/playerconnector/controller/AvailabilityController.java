@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * REST Controller for managing user availability operations.
+ * This controller handles CRUD operations for user availability schedules,
+ * allowing users to create, read, update, and delete their availability time slots.
+ */
 @RestController
 @RequestMapping("/availabilities")
 @Slf4j
@@ -28,7 +33,14 @@ public class AvailabilityController {
     @Autowired
     private UserService userService;
 
-    // TODO: This post request is no longer formatted in a way that allows for standard requests to make it in.
+    /**
+     * Creates a new availability entry for a specific user.
+     *
+     * @param availabilityData The availability data to be created
+     * @param userId The ID of the user for whom the availability is being created
+     * @return The created availability data
+     * @throws IllegalArgumentException if the user is not found
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AvailabilityData createAvailability(@RequestBody AvailabilityData availabilityData, @RequestParam Long userId) {
@@ -45,6 +57,12 @@ public class AvailabilityController {
         return availabilityService.mapToData(savedAvailability);
     }
 
+    /**
+     * Converts a Users entity to UsersData DTO.
+     *
+     * @param user The Users entity to convert
+     * @return The converted UsersData object
+     */
     private UsersData convertToUsersData(Users user) {
         // TODO: Implement the conversion logic here
         UsersData usersData = new UsersData();
@@ -62,6 +80,13 @@ public class AvailabilityController {
         return usersData;
     }
 
+    /**
+     * Retrieves all availability entries for a specific user.
+     *
+     * @param userId The ID of the user whose availabilities are being retrieved
+     * @return A ResponseEntity containing a list of availability data
+     * @throws IllegalArgumentException if the user is not found
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AvailabilityData>> getAvailabilitiesByUserId(@PathVariable Long userId) {
         Users user = userService.getUserEntityById(userId);
@@ -81,6 +106,14 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilityService.getAvailabilityById(id));
     }
 
+    /**
+     * Updates an existing availability entry.
+     *
+     * @param availabilityId The ID of the availability entry to update
+     * @param availabilityData The updated availability data
+     * @return A ResponseEntity containing the updated availability data
+     * @throws IllegalArgumentException if the availability entry is not found
+     */
     @PutMapping("/{availabilityId}")
     public ResponseEntity<AvailabilityData> updateAvailability(
             @PathVariable Long availabilityId,
@@ -98,6 +131,12 @@ public class AvailabilityController {
 //        userService.saveUser(user);
 //    }
 
+    /**
+     * Deletes a specific availability entry by its ID.
+     *
+     * @param availabilityId The ID of the availability entry to delete
+     * @throws IllegalArgumentException if the availability entry is not found
+     */
     @DeleteMapping("/{availabilityId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAvailabilityById(@PathVariable Long availabilityId) {
