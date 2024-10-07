@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+//Repository or Dao Level- contains additional query type to assist with case insensitivity.
 @Repository
 public interface UsersDao extends JpaRepository<Users, Long> {
     List<Users> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String query, String query1);
