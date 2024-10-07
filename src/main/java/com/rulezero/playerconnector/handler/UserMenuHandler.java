@@ -96,7 +96,6 @@ public class UserMenuHandler {
         newUser.setUserLoginName(userLoginName);
         newUser.setPassword(password);
         newUser.setUserEmail(userEmail);
-        // TODO: Find out if this HooDoo Works
 //        newUser.setAvailabilityId(null);
 //        newUser.setGameIds(null);
 
@@ -186,20 +185,6 @@ public class UserMenuHandler {
             existingUser.setUserEmail(userEmail);
         }
 
-//        System.out.println("Update the user's games? (leave blank to keep current):");
-//        String gameIdsInput = scanner.nextLine();
-//        if (!gameIdsInput.isEmpty()) {
-//            Set<Long> currentGameIds = existingUser.getGameIds();
-//            if (currentGameIds == null) {
-//                currentGameIds = new HashSet<>();
-//            }
-//            String[] newGameIds = gameIdsInput.trim().split(",");
-//            for (String gameId : newGameIds) {
-//                currentGameIds.add(Long.parseLong(gameId));
-//            }
-//            existingUser.setGameIds(currentGameIds);
-//        }
-
         System.out.println("Update the user's games? (Enter game IDs separated by commas, or leave blank to keep current):");
         String gameIdsInput = scanner.nextLine();
         if (!gameIdsInput.isEmpty()) {
@@ -229,6 +214,7 @@ public class UserMenuHandler {
         System.out.println("User deleted.");
     }
 
+    //Question about whether password should be set on this layer or not using the provided information. Perhaps an application of Hash and Salt?
     private UsersData convertToUsersData(Users user) {
         UsersData userData = new UsersData();
         userData.setUserId(user.getUserId());
@@ -240,7 +226,6 @@ public class UserMenuHandler {
         userData.setUserRegion(user.getUserRegion());
         userData.setUserLoginName(user.getUserLoginName());
         userData.setUserEmail(user.getUserEmail());
-        // Don't set the password here for security reasons
         userData.setAvailabilityId(user.getUserAvailability() != null ? user.getUserAvailability().getAvailabilityId() : null);
         userData.setGameIds(user.getGameUsers().stream().map(game -> game.getGameId()).collect(Collectors.toSet()));
         return userData;
